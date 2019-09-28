@@ -4,6 +4,7 @@ fun main() {
     game.startGame()
 
     while (true) {
+        if (game.selection == 'X') game.selection = 'O' else game.selection = 'X'
         game.playerTurn(game.selection)
         game.startGame()
         if (game.endgame()) break
@@ -35,29 +36,37 @@ class AllGame {
         println("X и Y от 1 до " + field.size)
         val (x, y) = readLine()!!.split(' ')
         field[x.toInt() - 1][y.toInt() - 1] = selection
-        if (selection == 'X') selection = 'O' else selection = 'X'
     }
 
-    private fun winCheck(size: Int) : Boolean{
-        for (i in 0 until size) {
-            for (j in 0 until size) {
-                if (field[i][j] != selection || field[i][j] != '*') break else return true
-            }
-        }
+    private fun winCheck(size: Int) : Boolean {
+        val check: Array<Int> = Array(4, {0;0;0;0})
 
         for (i in 0 until size) {
             for (j in 0 until size) {
-                if (field[j][i] != selection || field[j][i] != '*') break else return true
+                if (field[i][j] == selection) {
+                    check[0] += 1
+                }
             }
+            if (check[0] == size) return true else check[0] = 0
         }
 
         for (i in 0 until size) {
-                if (field[i][i] != selection || field[i][i] != '*') break else return true
+            for (j in 0 until size) {
+                if (field[j][i] == selection) {
+                    check[1] += 1
+                }
+            }
+            if (check[1] == size) return true else check[1] = 0
         }
 
         for (i in 0 until size) {
-                if (field[i][size - 1 - i] != selection || field[i][size - 1 - i] != '*') break else return true
+            if (field[i][i] == selection) check[2] += 1
         }
+
+        for (i in 0 until size) {
+            if (field[i][size - 1 - i] == selection) check[3] += 1
+        }
+        if (check[0] == size || check[1] == size || check[2] == size || check[3] == size) return true
         return false
     }
 
