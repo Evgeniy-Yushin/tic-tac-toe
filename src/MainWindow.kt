@@ -15,7 +15,7 @@ class StartPage : JFrame(), ActionListener{
     val jSlider = JSlider()
     var selection = true
     val jLabel2 = JLabel("Ход игрока ${if (selection == true) "X" else "O"}")
-    val field = LinkedList<JButton>()
+    val field = Array(10) {Array(10) {JButton(ImageIcon("startbutton.png"))} }
 
     fun createUI() {
         this.setSize(416, 459)
@@ -43,37 +43,36 @@ class StartPage : JFrame(), ActionListener{
         jButton.addActionListener(this)
     }
 
-    fun createField() {
-        remove(jSlider)
-        remove(jButton)
-        for (i in 0 until size) {
-            for (j in 0 until size) {
-                field.add(i + j, JButton())
-                field[i + j].setBounds(j*40, i* 40 + 20, 40, 40)
-                add(field[i + j])
-                field[i + j].isVisible = true
-                field[i + j].addActionListener(this)
-            }
-        }
-        repaint()
 
-        jLabel.setBounds(0, 0, 110, 21)
-        jLabel.text = "Размер поля = $size"
-        jLabel2.setBounds(324,0,110,21)
-        add(jLabel2)
-        jLabel2.isVisible = true
-    }
 
     override fun actionPerformed(e: ActionEvent?) {
-        if (e!!.source == jButton) size = jSlider.value
-        
+        if (e!!.source == jButton) {
+            size = jSlider.value
+            remove(jLabel)
+            remove(jSlider)
+            remove(jButton)
+
+            for (i in 0 until size) {
+                for (j in 0 until size) {
+                    field[i][j].setBounds(40 * j, 40 * i + 20, 40, 40)
+                    add(field[i][j])
+                    field[i][j].isVisible = true
+                    field[i][j].addActionListener(this)
+                }
+            }
+            jLabel2.setBounds(300, 0, 116, 20)
+            jLabel2.isVisible = true
+            add(jLabel2)
+            repaint()
+            return
+        }
+
         for (i in 0 until size) {
             for(j in 0 until size) {
-                if (e!!.source == field[i + j]) {
-                    if (e.source == field[i + j])
-                    field[i + j].text = if (selection) "X" else "O"
-                    selection != selection
-                    if (selection) field[i + j].background = Color.GREEN else field[i + j].background = Color.RED
+                if (e.source == field[i][j]) {
+                    field[i][j].text = if (selection) "X" else "O"
+                    if (selection) field[i][j].background = Color.GREEN else field[i][j].background = Color.RED
+                    selection = !selection
                 }
             }
         }
