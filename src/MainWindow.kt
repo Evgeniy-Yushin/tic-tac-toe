@@ -1,14 +1,12 @@
 package tictactoe
 
 import java.awt.Color
-import java.awt.TextField
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
-import java.util.*
 import javax.swing.*
 
 
-class StartPage : JFrame(), ActionListener{
+class MainWindow : JFrame(), ActionListener {
     var size = 3
     val jLabel = JLabel()
     val jButton = JButton("Ок.")
@@ -20,16 +18,16 @@ class StartPage : JFrame(), ActionListener{
     fun createUI() {
         this.setSize(516, 559)
 
-        jLabel.setBounds(168, 180, 100, 18)
+        jLabel.setBounds(210, 180, 100, 18)
         jLabel.text ="Размер поля: "
         this.add(jLabel, null)
 
-        jButton.setBounds(173, 300, 70, 30)
+        jButton.setBounds(216, 300, 70, 30)
         this.add(jButton, null)
 
         jSlider.minimum = 3
         jSlider.maximum = 10
-        jSlider.setBounds(0, 200, 400, 50)
+        jSlider.setBounds(0, 200, 500, 50)
         jSlider.majorTickSpacing = 1
         jSlider.paintTicks = true
         jSlider.snapToTicks = true
@@ -74,10 +72,9 @@ class StartPage : JFrame(), ActionListener{
                     field[i][j].text = if (selection) "X" else "O"
                     if (selection) field[i][j].background = Color.GREEN else field[i][j].background = Color.RED
                     field[i][j].isEnabled = false
-                    selection = !selection
-                    jLabel2.text = "Ход игрока ${if (selection) "X" else "O"}"
-
+                    jLabel2.text = "Ход игрока ${if (selection) "O" else "X"}"
                     if (endgame()) this.isEnabled = false
+                    selection = !selection
                 }
             }
         }
@@ -89,8 +86,10 @@ class StartPage : JFrame(), ActionListener{
         return true
     }
 
-    fun winCheck(size: Int) : Boolean {
-        val check: Array<Int> = Array(4) {0;0;0;0}
+    fun winCheck() : Boolean {
+        if (digCheck() || lanesCheck()) return true
+        return false
+        /*val check: Array<Int> = Array(4) {0}
 
         for (i in 0 until size) {
             for (j in 0 until size) {
@@ -118,21 +117,47 @@ class StartPage : JFrame(), ActionListener{
             if (field[i][size - 1 - i] == (if (selection) Color.RED else Color.GREEN)) check[3] += 1
         }
         if (check[0] == size || check[1] == size || check[2] == size || check[3] == size) return true
-        return false
+        return false*/
     }
 
     fun endgame() : Boolean {
-        if (winCheck(size)) {
-            jLabel.text = ("Игрок ${if (selection) 'O' else 'X'} победил. Игра окончена.")
+        if (winCheck()) {
+            jLabel.text = ("Игрок ${if (selection) 'X' else 'O'} победил. Игра окончена.")
             return true
         }
         if (draw()) {
             jLabel.text = "Ничья. Игра окончена."
             return true
         }
-        else return false
+        return false
     }
 
+
+    fun digCheck() : Boolean {
+        var toright = true
+        var toleft = true
+        for (i in 0 until size) {
+            toright = toright && (field[i][i].background == (if (selection) Color.GREEN else Color.RED))
+            toleft = toleft && (field[size - i - 1][i].background == (if (selection) Color.GREEN else Color.RED))
+        }
+        if (toright || toleft) return true
+        return false
+    }
+
+    fun lanesCheck() : Boolean {
+        var hor = true
+        var ver = true
+        for (i in 0 until size) {
+            hor = true
+            ver = true
+            for (j in 0 until size) {
+                hor = hor && (field[i][j].background == (if (selection) Color.GREEN else Color.RED))
+                ver = ver && (field[j][i].background == (if (selection) Color.GREEN else Color.RED))
+            }
+            if (hor || ver) return true
+        }
+        return false
+    }
    /* inner class FieldButtonActionListener : ActionListener {
         override fun actionPerformed(e: ActionEvent?) {
             finalfield[i].addActionListener(finalgameal[i]).run {

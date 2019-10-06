@@ -1,7 +1,7 @@
 package tictactoe
 
 fun main() {
-    val UI = StartPage()
-    UI.createUI()
-    UI.isVisible = true
+    val ui = MainWindow()
+    ui.createUI()
+    ui.isVisible = true
 }
