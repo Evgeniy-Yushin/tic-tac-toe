@@ -39,7 +39,7 @@ class AllGame {
     }
 
     private fun winCheck(size: Int) : Boolean {
-        val check: Array<Int> = Array(4, {0;0;0;0})
+        val check: Array<Int> = Array(4) {0;0;0;0}
 
         for (i in 0 until size) {
             for (j in 0 until size) {
