@@ -4,25 +4,32 @@ import java.awt.Color
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
 import javax.swing.*
+import javax.swing.event.ChangeEvent
+import javax.swing.event.ChangeListener
 
 
-class MainWindow : JFrame(), ActionListener {
+class MainWindow : JFrame(), ActionListener, ChangeListener {
     var size = 3
-    val jLabel = JLabel()
-    val jButton = JButton("Ок.")
-    val jSlider = JSlider()
+    var rule = 3
     var selection = true
-    val jLabel2 = JLabel("Ход игрока ${if (selection) "X" else "O"}")
-    val field = Array(10) {Array(10) {JButton(ImageIcon("startbutton.png"))} }
+    private val jLabel = JLabel("Размер поля: ")
+    private val jButton = JButton("Ок.")
+    private val jSlider = JSlider()
+    private val jSlider2 = JSlider()
+    private val jLabel2 = JLabel("Условие выигрыша: ")
+    private val field = Array(10) {Array(10) {JButton()} }
 
     fun createUI() {
         this.setSize(516, 559)
 
         jLabel.setBounds(210, 180, 100, 18)
-        jLabel.text ="Размер поля: "
         this.add(jLabel, null)
 
-        jButton.setBounds(216, 300, 70, 30)
+        jLabel2.setBounds(195, 380, 130, 18)
+        jLabel2.isVisible = true
+        this.add(jLabel2, null)
+
+        jButton.setBounds(216, 480, 70, 30)
         this.add(jButton, null)
 
         jSlider.minimum = 3
@@ -34,22 +41,36 @@ class MainWindow : JFrame(), ActionListener {
         jSlider.paintLabels = true
         this.add(jSlider, null)
 
+        jSlider2.minimum = 3
+        jSlider2.maximum = 10
+        jSlider2.setBounds(0, 400, 500, 50)
+        jSlider2.majorTickSpacing = 1
+        jSlider2.paintTicks = true
+        jSlider2.snapToTicks = true
+        jSlider2.paintLabels = true
+        this.add(jSlider2, null)
+
         this.contentPane.layout = null
-        //this.add(getJTextField(), null)
         this.title = "Крестики Нолики"
 
         jButton.addActionListener(this)
+        jSlider.addChangeListener(this)
     }
 
-
+    override fun stateChanged(e: ChangeEvent?) {
+        jSlider2.maximum = jSlider.value
+    }
 
     override fun actionPerformed(e: ActionEvent?) {
         if (e!!.source == jButton) {
             size = jSlider.value
-            jLabel.text = "Размер поля: ${size}x${size}"
-            jLabel.setBounds(0, 0, 200, 20)
+            rule = jSlider2.value
+            jLabel.text = "Размер поля: ${size}x${size}                                Условие выигрыша: $rule"
+            jLabel2.text = "Ход игрока ${if (selection) "X" else "O"}"
+            jLabel.setBounds(0, 0, 500, 20)
             remove(jSlider)
             remove(jButton)
+            remove(jSlider2)
 
             for (i in 0 until size) {
                 for (j in 0 until size) {
@@ -60,8 +81,6 @@ class MainWindow : JFrame(), ActionListener {
                 }
             }
             jLabel2.setBounds(423, 0, 116, 20)
-            jLabel2.isVisible = true
-            add(jLabel2)
             repaint()
             return
         }
@@ -81,46 +100,21 @@ class MainWindow : JFrame(), ActionListener {
         repaint()
     }
 
-    fun draw() : Boolean {
+    private fun draw() : Boolean {
         for (i in 0 until size) for (j in 0 until size) if (field[i][j].isEnabled) return false
         return true
     }
 
-    fun winCheck() : Boolean {
-        if (digCheck() || lanesCheck()) return true
+    private fun winCheck() : Boolean {
+        for (i in 0 until size - rule + 1) {
+            for (j in 0 until size - rule + 1) {
+                if (digCheck(i, j) || lanesCheck(i, j)) return true
+            }
+        }
         return false
-        /*val check: Array<Int> = Array(4) {0}
-
-        for (i in 0 until size) {
-            for (j in 0 until size) {
-                if (field[i][j].background == (if (selection) Color.RED else Color.GREEN)) {
-                    check[0] += 1
-                }
-            }
-            if (check[0] == size) return true else check[0] = 0
-        }
-
-        for (i in 0 until size) {
-            for (j in 0 until size) {
-                if (field[j][i] == (if (selection) Color.RED else Color.GREEN)) {
-                    check[1] += 1
-                }
-            }
-            if (check[1] == size) return true else check[1] = 0
-        }
-
-        for (i in 0 until size) {
-            if (field[i][i] == (if (selection) Color.RED else Color.GREEN)) check[2] += 1
-        }
-
-        for (i in 0 until size) {
-            if (field[i][size - 1 - i] == (if (selection) Color.RED else Color.GREEN)) check[3] += 1
-        }
-        if (check[0] == size || check[1] == size || check[2] == size || check[3] == size) return true
-        return false*/
     }
 
-    fun endgame() : Boolean {
+    private fun endgame() : Boolean {
         if (winCheck()) {
             jLabel.text = ("Игрок ${if (selection) 'X' else 'O'} победил. Игра окончена.")
             return true
@@ -133,24 +127,24 @@ class MainWindow : JFrame(), ActionListener {
     }
 
 
-    fun digCheck() : Boolean {
+    private fun digCheck(d1: Int, d2: Int) : Boolean {
         var toright = true
         var toleft = true
-        for (i in 0 until size) {
-            toright = toright && (field[i][i].background == (if (selection) Color.GREEN else Color.RED))
-            toleft = toleft && (field[size - i - 1][i].background == (if (selection) Color.GREEN else Color.RED))
+        for (i in 0 until rule) {
+                toright = toright && (field[i + d1][i + d2].background == (if (selection) Color.GREEN else Color.RED))
+                toleft = toleft && (field[rule - i - 1 + d1][i + d2].background == (if (selection) Color.GREEN else Color.RED))
         }
         if (toright || toleft) return true
         return false
     }
 
-    fun lanesCheck() : Boolean {
-        var hor = true
-        var ver = true
-        for (i in 0 until size) {
+    private fun lanesCheck(d1: Int, d2: Int) : Boolean {
+        var hor: Boolean
+        var ver: Boolean
+        for (i in d1 until rule + d1) {
             hor = true
             ver = true
-            for (j in 0 until size) {
+            for (j in d2 until rule + d2) {
                 hor = hor && (field[i][j].background == (if (selection) Color.GREEN else Color.RED))
                 ver = ver && (field[j][i].background == (if (selection) Color.GREEN else Color.RED))
             }
@@ -158,13 +152,4 @@ class MainWindow : JFrame(), ActionListener {
         }
         return false
     }
-   /* inner class FieldButtonActionListener : ActionListener {
-        override fun actionPerformed(e: ActionEvent?) {
-            finalfield[i].addActionListener(finalgameal[i]).run {
-                finalfield[i].text = if (selection) "X" else "O"
-                selection = !selection
-                repaint()
-            }
-        }
-    }*/
 }
