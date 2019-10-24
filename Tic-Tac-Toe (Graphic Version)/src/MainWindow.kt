@@ -1,15 +1,18 @@
 import java.awt.Color
 import java.awt.event.ActionEvent
 import java.awt.event.ActionListener
+import java.io.File
+import javax.imageio.ImageIO
 import javax.swing.*
 import javax.swing.event.ChangeEvent
 import javax.swing.event.ChangeListener
 
 
 class MainWindow : JFrame(), ActionListener, ChangeListener {
-    var size = 3
-    var rule = 3
-    var selection = true
+    private var img = ImageIO.read(File("src/toe.png"))
+    private var size = 3
+    private var rule = 3
+    private var selection = true
     private val jLabel = JLabel("Размер поля: ")
     private val jButton = JButton("Ок.")
     private val jSlider = JSlider()
@@ -18,6 +21,7 @@ class MainWindow : JFrame(), ActionListener, ChangeListener {
     private val field = Array(10) {Array(10) {JButton()} }
 
     fun createUI() {
+        this.iconImage = img
         this.setSize(516, 559)
 
         jLabel.setBounds(210, 180, 100, 18)
@@ -90,7 +94,13 @@ class MainWindow : JFrame(), ActionListener, ChangeListener {
                     if (selection) field[i][j].background = Color.GREEN else field[i][j].background = Color.RED
                     field[i][j].isEnabled = false
                     jLabel2.text = "Ход игрока ${if (selection) "O" else "X"}"
-                    if (endgame()) this.isEnabled = false
+                    if (endgame()) {
+                        for (x in 0 until size) {
+                            for (y in 0 until size) {
+                                field[x][y].isEnabled = false
+                            }
+                        }
+                    }
                     selection = !selection
                 }
             }
@@ -124,7 +134,6 @@ class MainWindow : JFrame(), ActionListener, ChangeListener {
         return false
     }
 
-
     private fun digCheck(d1: Int, d2: Int) : Boolean {
         var toright = true
         var toleft = true
@@ -151,3 +160,4 @@ class MainWindow : JFrame(), ActionListener, ChangeListener {
         return false
     }
 }
+
